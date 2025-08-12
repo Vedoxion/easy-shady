@@ -1,80 +1,56 @@
-#!/usr/bin/env bash
+#!/bin/bash
 
-# Colors & Effects
+# Colors
 RED='\033[0;31m'
-GREEN='\033[0;32m'
-CYAN='\033[0;36m'
+ORANGE='\033[0;33m'
 YELLOW='\033[1;33m'
+GREEN='\033[0;32m'
+BLUE='\033[0;34m'
 PURPLE='\033[0;35m'
-BOLD='\033[1m'
-BLINK='\033[5m'
 NC='\033[0m' # No Color
 
-# Function: typewriter effect
-type_text() {
+# Rainbow ASCII Logo
+echo -e "${RED}  _________.__                .___       "
+echo -e "${ORANGE} /   _____/|  |__ _____     __| _/__.__. "
+echo -e "${YELLOW} \_____  \ |  |  \\\__  \   / __ <   |  | "
+echo -e "${GREEN} /        \|   Y  \/ __ \_/ /_/ |\___  | "
+echo -e "${BLUE}/_______  /|___|  (____  /\____ |/ ____|"
+echo -e "${PURPLE}        \/      \/     \/      \/\/      "
+echo -e "${NC}"
+
+# Typing effect function
+typewriter() {
     text="$1"
-    color="$2"
-    delay=${3:-0.002}
-    for (( i=0; i<${#text}; i++ )); do
-        echo -ne "${color}${text:$i:1}${NC}"
-        sleep $delay
+    delay="${2:-0.03}"
+    for ((i=0; i<${#text}; i++)); do
+        echo -n "${text:$i:1}"
+        sleep "$delay"
     done
-    echo ""
+    echo
 }
 
-# Function: loading animation
-loading() {
-    echo -ne "${CYAN}Loading"
-    for i in {1..3}; do
-        echo -n "."
-        sleep 0.3
+# Welcome message
+typewriter "Welcome to the SHADY Easy Installer 🚀" 0.04
+typewriter "Let's get your system ready..." 0.04
+
+# Progress bar
+progress_bar() {
+    local duration=$1
+    already_done() { for ((done=0; done<$1; done++)); do echo -n "▰"; done }
+    remaining() { for ((remain=$1; remain<$2; remain++)); do echo -n "▱"; done }
+    for ((elapsed=1; elapsed<=$duration; elapsed++)); do
+        already_done $elapsed
+        remaining $elapsed $duration
+        printf "  %s%%\r" $((elapsed * 100 / duration))
+        sleep 0.1
     done
-    echo -e "${NC}"
+    echo
 }
 
-# Function: glowing menu
-glow_menu() {
-    echo -e "${BOLD}${YELLOW}${BLINK}1)${NC} ${GREEN}Install Pterodactyl${NC}"
-    echo -e "${BOLD}${YELLOW}${BLINK}2)${NC} ${GREEN}Install Blueprint${NC}"
-    echo -e "${BOLD}${YELLOW}${BLINK}3)${NC} ${RED}Exit${NC}"
-}
+# Install packages
+typewriter "Installing base packages..." 0.04
+progress_bar 20
+sudo apt update && sudo apt install -y git curl unzip htop neofetch
 
-clear
-
-# Colored ASCII Banner
-type_text "  _________.__                .___       " "$CYAN"
-type_text " /   _____/|  |__ _____     __| _/__.__. " "$GREEN"
-type_text " \_____  \ |  |  \\\\__  \   / __ <   |  | " "$YELLOW"
-type_text " /        \|   Y  \\/ __ \_/ /_/ |\___  | " "$PURPLE"
-type_text "/_______  /|___|  (____  /\\\____ |/ ____| " "$RED"
-type_text "        \\/      \\/     \\/      \\/\\/      " "$CYAN"
-
-echo -e "${GREEN}            Welcome to Shady's Installer${NC}"
-echo -e "${CYAN}================================================${NC}"
-
-# Loop menu
-while true; do
-    glow_menu
-    echo -e "${CYAN}================================================${NC}"
-    read -p "Select an option [1-3]: " choice
-
-    case $choice in
-        1)
-            echo -e "${GREEN}Starting Pterodactyl installation...${NC}"
-            loading
-            bash <(curl -fsSL https://pterodactyl-installer.se)
-            ;;
-        2)
-            echo -e "${GREEN}Starting Blueprint installation...${NC}"
-            loading
-            bash <(curl -fsSL https://raw.githubusercontent.com/shinzzlol/Shell/refs/heads/main/blueprint.sh)
-            ;;
-        3)
-            echo -e "${RED}Shutting down Shady's Installer... Goodbye!${NC}"
-            exit 0
-            ;;
-        *)
-            echo -e "${RED}Invalid choice. Try again.${NC}"
-            ;;
-    esac
-done
+typewriter "Installation complete ✅" 0.04
+echo -e "${GREEN}All set, Shady!${NC}"
